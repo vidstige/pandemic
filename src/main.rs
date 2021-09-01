@@ -1,16 +1,22 @@
 const CITIES: usize = 48;
 const DISEASES: usize = 4;
 
-struct Card {
-
+#[derive(Clone)]
+enum Card {
+    City(usize),
 }
 
 #[derive(Clone)]
 struct Stack {
-
+    cards: Vec<Card>,
 }
+
 fn empty() -> Stack {
-    return Stack {};
+    return Stack { cards: vec![] };
+}
+fn full() -> Stack {
+    let cards: Vec<Card> = (0..CITIES).into_iter().map(|i| Card::City(i)).collect();
+    return Stack { cards: cards };
 }
 
 struct Disease {
@@ -36,9 +42,9 @@ fn initial(players: usize) -> State  {
         Disease { cured: false, eradicated: false},
     ];
     return State {
-        hands: vec![Stack {}; players],
-        player_cards: empty(),
-        infection_cards: empty(),
+        hands: vec![empty(); players],
+        player_cards: full(),
+        infection_cards: full(),
         infection_discard: empty(),
         diseases: diseases,
         cubes: [0; CITIES],
