@@ -99,9 +99,10 @@ struct State {
     player_discard: Stack,
     infection_cards: Stack,
     infection_discard: Stack,
+    infection_rate: usize,
     diseases: [Disease; DISEASES],
     cubes: [u32; CITIES.len()],
-    outbreaks: i32,
+    outbreaks: usize,
 }
 
 // Create an empty game state with unshuffled decks, etc.
@@ -118,6 +119,7 @@ fn create(players: usize) -> State  {
         player_discard: empty(),
         infection_cards: full(),
         infection_discard: empty(),
+        infection_rate: 0,
         diseases: diseases,
         cubes: [0; CITIES.len()],
         outbreaks: 0,
