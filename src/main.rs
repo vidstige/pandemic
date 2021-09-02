@@ -77,6 +77,16 @@ impl Drawable<InfectionCard> for Stack<InfectionCard> {
     }
 }
 
+impl Drawable<PlayerCard> for Stack<PlayerCard> {
+    fn draw(&mut self) -> PlayerCard {
+        let card = self.cards.drain((self.cards.len() - 1)..).next();
+        match card {
+            Some(card) => return card,
+            None => return std::panic::panic_any(-1),
+        }
+    }
+}
+
 fn empty<T>() -> Stack<T> {
     return Stack { cards: vec![] };
 }
@@ -84,6 +94,11 @@ fn empty<T>() -> Stack<T> {
 fn full() -> Stack<InfectionCard> {
     let cards: Vec<InfectionCard> = (0..CITIES.len()).collect();
     return Stack { cards: cards };
+}
+
+fn player_cards() -> Stack<PlayerCard> {
+    let cards: Vec<PlayerCard> = (0..CITIES.len()).map(|i| PlayerCard::City(i)).collect();
+    return Stack { cards: cards }; 
 }
 
 struct Disease {
@@ -113,7 +128,7 @@ fn create(players: usize) -> State  {
     ];
     return State {
         hands: vec![empty(); players],
-        player_cards: empty(),
+        player_cards: player_cards(),
         player_discard: empty(),
         infection_cards: full(),
         infection_discard: empty(),
@@ -128,9 +143,24 @@ fn infect(state: &mut State, infection_card: InfectionCard) {
     state.cubes[infection_card] += 1;
 }
 
+fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
+    let card = deck.draw();
+    hand.cards.push(card);
+}
+
 fn setup(state: &mut State) {
+    // Shuffle player cards
+
+    // Deal player cards
+    let n = 6 - state.hands.len();
+    for hand in state.hands.iter_mut() {
+        for _ in 0..n {
+            deal(&mut state.player_cards, hand);
+        }
+    }
+
     // Infect three cities with three cubes, three cities with two cubes and three cities
-    //  with one cube
+    // with one cube
     for i in 0..3 {
         for _ in 0..3 {
             let infection_card = state.infection_cards.draw();
