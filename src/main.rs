@@ -71,12 +71,16 @@ struct Stack {
     cards: Vec<Card>,
 }
 trait Drawable {
-    fn draw(&mut self) -> Option<Card>;
+    fn draw(&mut self) -> Card;
 }
 
 impl Drawable for Stack {
-    fn draw(&mut self) -> Option<Card> {
-        return self.cards.drain((self.cards.len() - 1)..).next();
+    fn draw(&mut self) -> Card {
+        let card = self.cards.drain((self.cards.len() - 1)..).next();
+        match card {
+            Some(card) => return card,
+            None => return std::panic::panic_any(-1),
+        }
     }
 }
 
@@ -126,8 +130,17 @@ fn create(players: usize) -> State  {
      };
 }
 
+fn infect(state: &mut State, city_index: usize) {
+    state.cubes[city_index] += 1;
+}
+
 fn setup(state: &mut State) {
     let card = state.infection_cards.draw();
+    for _ in 0..3 {
+        match card {
+            Card::City(index) => infect(state, index),
+        }
+    }
     println!("{:?}", card);
 }
 
