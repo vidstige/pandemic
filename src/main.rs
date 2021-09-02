@@ -69,7 +69,6 @@ trait Drawable<T> {
 
 impl Drawable<InfectionCard> for Stack<InfectionCard> {
     fn draw(&mut self) -> InfectionCard {
-        
         let card = self.cards.drain((self.cards.len() - 1)..).next();
         match card {
             Some(card) => return card,
@@ -130,11 +129,16 @@ fn infect(state: &mut State, infection_card: InfectionCard) {
 }
 
 fn setup(state: &mut State) {
-    let infection_card = state.infection_cards.draw();
-    for _ in 0..3 {
-        infect(state, infection_card);
+    // Infect three cities with three cubes, three cities with two cubes and three cities
+    //  with one cube
+    for i in 0..3 {
+        for _ in 0..3 {
+            let infection_card = state.infection_cards.draw();
+            for _ in 0..(3 - i) {
+                infect(state, infection_card);
+            }
+        }
     }
-    println!("{:?}", infection_card);
 }
 
 fn main() {
