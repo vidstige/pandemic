@@ -1,11 +1,11 @@
-use std::fmt;
-
 const DISEASES: usize = 4;
 
 #[derive(Clone)]
-enum Card {
+enum PlayerCard {
     City(usize),
 }
+
+type InfectionCard = usize; // index to cities array
 
 const CITIES: &[&str] = &[
   "Atlanta",
@@ -58,24 +58,18 @@ const CITIES: &[&str] = &[
   "Sidney",
 ];
 
-impl fmt::Debug for Card {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Card::City(i) => write!(f, "{}", CITIES[*i]),
-        }
-    }
-}
-
 #[derive(Clone)]
-struct Stack {
-    cards: Vec<Card>,
-}
-trait Drawable {
-    fn draw(&mut self) -> Card;
+struct Stack<T> {
+    cards: Vec<T>,
 }
 
-impl Drawable for Stack {
-    fn draw(&mut self) -> Card {
+trait Drawable<T> {
+    fn draw(&mut self) -> T;
+}
+
+impl Drawable<InfectionCard> for Stack<InfectionCard> {
+    fn draw(&mut self) -> InfectionCard {
+        
         let card = self.cards.drain((self.cards.len() - 1)..).next();
         match card {
             Some(card) => return card,
@@ -84,11 +78,12 @@ impl Drawable for Stack {
     }
 }
 
-fn empty() -> Stack {
+fn empty<T>() -> Stack<T> {
     return Stack { cards: vec![] };
 }
-fn full() -> Stack {
-    let cards: Vec<Card> = (0..CITIES.len()).into_iter().map(|i| Card::City(i)).collect();
+
+fn full() -> Stack<InfectionCard> {
+    let cards: Vec<InfectionCard> = (0..CITIES.len()).collect();
     return Stack { cards: cards };
 }
 
@@ -98,11 +93,11 @@ struct Disease {
 }
 
 struct State {
-    hands: Vec<Stack>,
-    player_cards: Stack,
-    player_discard: Stack,
-    infection_cards: Stack,
-    infection_discard: Stack,
+    hands: Vec<Stack<PlayerCard>>,
+    player_cards: Stack<PlayerCard>,
+    player_discard: Stack<PlayerCard>,
+    infection_cards: Stack<InfectionCard>,
+    infection_discard: Stack<InfectionCard>,
     infection_rate: usize,
     diseases: [Disease; DISEASES],
     cubes: [u32; CITIES.len()],
@@ -119,7 +114,7 @@ fn create(players: usize) -> State  {
     ];
     return State {
         hands: vec![empty(); players],
-        player_cards: full(),
+        player_cards: empty(),
         player_discard: empty(),
         infection_cards: full(),
         infection_discard: empty(),
@@ -130,18 +125,16 @@ fn create(players: usize) -> State  {
      };
 }
 
-fn infect(state: &mut State, city_index: usize) {
-    state.cubes[city_index] += 1;
+fn infect(state: &mut State, infection_card: InfectionCard) {
+    state.cubes[infection_card] += 1;
 }
 
 fn setup(state: &mut State) {
-    let card = state.infection_cards.draw();
+    let infection_card = state.infection_cards.draw();
     for _ in 0..3 {
-        match card {
-            Card::City(index) => infect(state, index),
-        }
+        infect(state, infection_card);
     }
-    println!("{:?}", card);
+    println!("{:?}", infection_card);
 }
 
 fn main() {
