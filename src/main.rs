@@ -64,26 +64,18 @@ struct Stack<T> {
 }
 
 trait Drawable<T> {
-    fn draw(&mut self) -> T;
+    fn draw(&mut self) -> Option<T>;
 }
 
 impl Drawable<InfectionCard> for Stack<InfectionCard> {
-    fn draw(&mut self) -> InfectionCard {
-        let card = self.cards.drain((self.cards.len() - 1)..).next();
-        match card {
-            Some(card) => return card,
-            None => return std::panic::panic_any(-1),
-        }
+    fn draw(&mut self) -> Option<InfectionCard> {
+        return self.cards.drain((self.cards.len() - 1)..).next();
     }
 }
 
 impl Drawable<PlayerCard> for Stack<PlayerCard> {
-    fn draw(&mut self) -> PlayerCard {
-        let card = self.cards.drain((self.cards.len() - 1)..).next();
-        match card {
-            Some(card) => return card,
-            None => return std::panic::panic_any(-1),
-        }
+    fn draw(&mut self) -> Option<PlayerCard> {
+        return self.cards.drain((self.cards.len() - 1)..).next();
     }
 }
 
@@ -108,6 +100,8 @@ struct Player {
 }
 
 struct State {
+    turn: usize,
+    actions_done: usize,
     players: Vec<Player>,
     player_cards: Stack<PlayerCard>,
     player_discard: Stack<PlayerCard>,
@@ -127,6 +121,8 @@ fn city_by_name(name: &str) -> Option<usize> {
 fn create(players: usize) -> State  {
     let atlanta = city_by_name("Atlanta").unwrap();
     return State {
+        turn: 0,
+        actions_done: 0,
         players: vec![Player { hand: empty(), location: atlanta }; players],
         player_cards: player_cards(),
         player_discard: empty(),
@@ -144,8 +140,10 @@ fn infect(state: &mut State, infection_card: InfectionCard) {
 }
 
 fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
-    let card = deck.draw();
-    hand.cards.push(card);
+    match deck.draw() {
+        Some(card) => hand.cards.push(card),
+        None => (),
+    }
 }
 
 fn setup(state: &mut State) {
@@ -163,7 +161,7 @@ fn setup(state: &mut State) {
     // with one cube
     for i in 0..3 {
         for _ in 0..3 {
-            let infection_card = state.infection_cards.draw();
+            let infection_card = state.infection_cards.draw().unwrap();
             for _ in 0..(3 - i) {
                 infect(state, infection_card);
             }
@@ -171,11 +169,28 @@ fn setup(state: &mut State) {
     }
 }
 
+enum Ply {
+    Drive(usize),
+    DirectFlight(usize),
+    CharteredFlight(usize),
+    Treat(usize),
+}
+
+// Performs given ply on state and returns new state
+/*fn perform(state: &State, ply: Ply) -> State {
+    return state;
+}*/
+
+fn plys(state: &State) -> Vec<Ply> {
+    return vec![];
+}
+
 fn search(state: &State) {
-    
+    let player_index = state.turn % state.players.len();
 }
 
 fn main() {
     let mut state = create(3);
     setup(&mut state);
+    search(&state);
 }
