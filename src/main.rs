@@ -99,6 +99,7 @@ struct Player {
     location: usize, // city index
 }
 
+#[derive(Clone)]
 struct State {
     turn: usize,
     actions_done: usize,
@@ -177,9 +178,10 @@ enum Ply {
 }
 
 // Performs given ply on state and returns new state
-/*fn perform(state: &State, ply: Ply) -> State {
-    return state;
-}*/
+fn perform(state: &State, ply: Ply) -> State {
+    let state1 = state.clone();
+    return state1;
+}
 
 fn plys(state: &State) -> Vec<Ply> {
     return vec![];
