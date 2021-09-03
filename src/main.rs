@@ -162,7 +162,7 @@ struct State {
     infection_discard: Stack<InfectionCard>,
     infection_rate: usize,
     cured: [bool; DISEASES],
-    cubes: [[u32; CITY_DISEASES.len()]; DISEASES], // cubes per disease
+    cubes: [[usize; CITY_DISEASES.len()]; DISEASES], // cubes per disease
     outbreaks: usize,
 }
 
@@ -240,9 +240,30 @@ fn plys(state: &State) -> Vec<Ply> {
     return vec![];
 }
 
+fn cubes_of(state: &State, disease: usize) -> usize {
+    return state.cubes[disease].iter().sum();
+}
+
 // Returns none if the game is not over, otherwise true for win and false for loose
-fn isWin(state: &State) -> Option<bool> {
-    return None
+fn is_win(state: &State) -> Option<bool> {
+    // Players loose if there are more than 7 outbreaks
+    if state.outbreaks > 7 {
+        return Some(false);
+    }
+    // Players loose if any cube pile runs out
+    for disease in 0..4 {
+        if cubes_of(state, disease) > 24 {
+            return Some(false);
+        }
+    }
+    // TODO: Players loose if player card is empty at end of turn
+
+    // Players win if all diseases are cured
+    if state.cured.iter().all(|&b| b) {
+        return Some(true);
+    }
+
+    return None;
 }
 
 fn search(state: &State) {
