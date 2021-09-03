@@ -101,11 +101,6 @@ fn player_cards() -> Stack<PlayerCard> {
     return Stack { cards: cards }; 
 }
 
-struct Disease {
-    cured: bool,
-    eradicated: bool,
-}
-
 struct State {
     hands: Vec<Stack<PlayerCard>>,
     player_cards: Stack<PlayerCard>,
@@ -113,19 +108,13 @@ struct State {
     infection_cards: Stack<InfectionCard>,
     infection_discard: Stack<InfectionCard>,
     infection_rate: usize,
-    diseases: [Disease; DISEASES],
+    cured: [bool; DISEASES],
     cubes: [u32; CITIES.len()],
     outbreaks: usize,
 }
 
 // Create an empty game state with unshuffled decks, etc.
 fn create(players: usize) -> State  {
-    let diseases = [
-        Disease { cured: false, eradicated: false},
-        Disease { cured: false, eradicated: false},
-        Disease { cured: false, eradicated: false},
-        Disease { cured: false, eradicated: false},
-    ];
     return State {
         hands: vec![empty(); players],
         player_cards: player_cards(),
@@ -133,7 +122,7 @@ fn create(players: usize) -> State  {
         infection_cards: full(),
         infection_discard: empty(),
         infection_rate: 0,
-        diseases: diseases,
+        cured: [false; DISEASES],
         cubes: [0; CITIES.len()],
         outbreaks: 0,
      };
