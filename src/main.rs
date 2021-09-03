@@ -223,23 +223,6 @@ fn setup(state: &mut State) {
     }
 }
 
-enum Ply {
-    Drive(usize),
-    DirectFlight(usize),
-    CharteredFlight(usize),
-    Treat(usize),
-}
-
-// Performs given ply on state and returns new state
-fn perform(state: &State, ply: Ply) -> State {
-    let state1 = state.clone();
-    return state1;
-}
-
-fn plys(state: &State) -> Vec<Ply> {
-    return vec![];
-}
-
 fn cubes_of(state: &State, disease: usize) -> usize {
     return state.cubes[disease].iter().sum();
 }
@@ -266,11 +249,36 @@ fn is_win(state: &State) -> Option<bool> {
     return None;
 }
 
-fn search(state: &State) {
-    let player_index = state.turn % state.players.len();
+enum Ply {
+    Drive(usize),
+    DirectFlight(usize),
+    CharteredFlight(usize),
+    Treat(usize),
+}
+
+// Performs given ply on state and returns new state
+fn perform(state: &State, ply: Ply) -> State {
+    let state1 = state.clone();
+    return state1;
+}
+
+fn player_index(state: &State) -> usize {
+    return state.turn % state.players.len();
+}
+
+fn plys(state: &State) -> Vec<Ply> {
+    return vec![];
+}
+
+fn search(state: &State) -> i32 {
+    if let Some(win) = is_win(state) {
+        return if win { i32::MAX } else { i32::MIN };
+    }
+
     for ply in plys(state) {
         search(&perform(&state, ply));
     }
+    return 0;
 }
 
 fn main() {
