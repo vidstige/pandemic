@@ -101,8 +101,14 @@ fn player_cards() -> Stack<PlayerCard> {
     return Stack { cards: cards }; 
 }
 
+#[derive(Clone)]
+struct Player {
+    hand: Stack<PlayerCard>,
+    location: usize, // city index
+}
+
 struct State {
-    hands: Vec<Stack<PlayerCard>>,
+    players: Vec<Player>,
     player_cards: Stack<PlayerCard>,
     player_discard: Stack<PlayerCard>,
     infection_cards: Stack<InfectionCard>,
@@ -113,10 +119,15 @@ struct State {
     outbreaks: usize,
 }
 
+fn city_by_name(name: &str) -> Option<usize> {
+    return CITIES.iter().position(|&city| city == name);
+}
+
 // Create an empty game state with unshuffled decks, etc.
 fn create(players: usize) -> State  {
+    let atlanta = city_by_name("Atlanta").unwrap();
     return State {
-        hands: vec![empty(); players],
+        players: vec![Player { hand: empty(), location: atlanta }; players],
         player_cards: player_cards(),
         player_discard: empty(),
         infection_cards: full(),
@@ -141,10 +152,10 @@ fn setup(state: &mut State) {
     // Shuffle player cards
 
     // Deal player cards
-    let n = 6 - state.hands.len();
-    for hand in state.hands.iter_mut() {
+    let n = 6 - state.players.len();
+    for player in &mut state.players {
         for _ in 0..n {
-            deal(&mut state.player_cards, hand);
+            deal(&mut state.player_cards, &mut player.hand);
         }
     }
 
@@ -158,6 +169,10 @@ fn setup(state: &mut State) {
             }
         }
     }
+}
+
+fn search(state: &State) {
+    
 }
 
 fn main() {
