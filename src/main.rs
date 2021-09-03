@@ -1,4 +1,5 @@
 const DISEASES: usize = 4;
+// blue, yellow, black, red
 
 #[derive(Clone)]
 enum PlayerCard {
@@ -6,6 +7,57 @@ enum PlayerCard {
 }
 
 type InfectionCard = usize; // index to cities array
+
+const CITY_DISEASES: [usize; 48] = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+];
 
 const CITIES: &[&str] = &[
   "Atlanta",
@@ -110,7 +162,7 @@ struct State {
     infection_discard: Stack<InfectionCard>,
     infection_rate: usize,
     cured: [bool; DISEASES],
-    cubes: [u32; CITIES.len()],
+    cubes: [[u32; CITIES.len()]; DISEASES], // cubes per disease
     outbreaks: usize,
 }
 
@@ -131,13 +183,14 @@ fn create(players: usize) -> State  {
         infection_discard: empty(),
         infection_rate: 0,
         cured: [false; DISEASES],
-        cubes: [0; CITIES.len()],
+        cubes: [[0; CITIES.len()]; DISEASES],
         outbreaks: 0,
      };
 }
 
 fn infect(state: &mut State, infection_card: InfectionCard) {
-    state.cubes[infection_card] += 1;
+    let disease = CITY_DISEASES[infection_card];
+    state.cubes[disease][infection_card] += 1;
 }
 
 fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
@@ -187,8 +240,16 @@ fn plys(state: &State) -> Vec<Ply> {
     return vec![];
 }
 
+// Returns none if the game is not over, otherwise true for win and false for loose
+fn isWin(state: &State) -> Option<bool> {
+    return None
+}
+
 fn search(state: &State) {
     let player_index = state.turn % state.players.len();
+    for ply in plys(state) {
+        search(&perform(&state, ply));
+    }
 }
 
 fn main() {
