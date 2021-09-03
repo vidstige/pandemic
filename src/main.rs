@@ -59,7 +59,7 @@ const CITY_DISEASES: [usize; 48] = [
     3,
 ];
 
-const CITIES: &[&str] = &[
+const CITY_NAMES: &[&str] = &[
   "Atlanta",
   "San Franscisco",
   "Chicago",
@@ -136,12 +136,12 @@ fn empty<T>() -> Stack<T> {
 }
 
 fn full() -> Stack<InfectionCard> {
-    let cards: Vec<InfectionCard> = (0..CITIES.len()).collect();
+    let cards: Vec<InfectionCard> = (0..CITY_DISEASES.len()).collect();
     return Stack { cards: cards };
 }
 
 fn player_cards() -> Stack<PlayerCard> {
-    let cards: Vec<PlayerCard> = (0..CITIES.len()).map(|i| PlayerCard::City(i)).collect();
+    let cards: Vec<PlayerCard> = (0..CITY_DISEASES.len()).map(|i| PlayerCard::City(i)).collect();
     return Stack { cards: cards }; 
 }
 
@@ -162,12 +162,12 @@ struct State {
     infection_discard: Stack<InfectionCard>,
     infection_rate: usize,
     cured: [bool; DISEASES],
-    cubes: [[u32; CITIES.len()]; DISEASES], // cubes per disease
+    cubes: [[u32; CITY_DISEASES.len()]; DISEASES], // cubes per disease
     outbreaks: usize,
 }
 
 fn city_by_name(name: &str) -> Option<usize> {
-    return CITIES.iter().position(|&city| city == name);
+    return CITY_NAMES.iter().position(|&city| city == name);
 }
 
 // Create an empty game state with unshuffled decks, etc.
@@ -183,7 +183,7 @@ fn create(players: usize) -> State  {
         infection_discard: empty(),
         infection_rate: 0,
         cured: [false; DISEASES],
-        cubes: [[0; CITIES.len()]; DISEASES],
+        cubes: [[0; CITY_DISEASES.len()]; DISEASES],
         outbreaks: 0,
      };
 }
