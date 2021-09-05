@@ -1,3 +1,4 @@
+use rand::Rng;
 mod pandemic;
 
 use pandemic::State;
@@ -17,6 +18,7 @@ fn search(state: &State) -> i32 {
 }
 
 fn main() {
+    let mut rgn = rand::thread_rng();
     let mut state = pandemic::create(3);
     pandemic::setup(&mut state);
     search(&state);
