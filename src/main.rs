@@ -3,7 +3,7 @@ mod pandemic;
 
 use pandemic::State;
 use pandemic::is_win;
-use pandemic::plys;
+use pandemic::valid_plys;
 use pandemic::perform;
 
 fn search(state: &State) -> i32 {
@@ -11,7 +11,7 @@ fn search(state: &State) -> i32 {
         return if win { i32::MAX } else { i32::MIN };
     }
 
-    for ply in plys(state) {
+    for ply in valid_plys(state) {
         search(&perform(&state, ply));
     }
     return 0;

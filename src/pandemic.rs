@@ -266,6 +266,6 @@ fn player_index(state: &State) -> usize {
     return state.turn % state.players.len();
 }
 
-pub fn plys(state: &State) -> Vec<Ply> {
+pub fn valid_plys(state: &State) -> Vec<Ply> {
     return vec![];
 }
