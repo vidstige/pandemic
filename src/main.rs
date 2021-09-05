@@ -7,13 +7,15 @@ use pandemic::is_win;
 use pandemic::valid_plys;
 use pandemic::perform;
 
-fn search(state: &State, rng: &mut impl Rng) -> i32 {
-    if let Some(win) = is_win(state) {
-        return if win { i32::MAX } else { i32::MIN };
+fn playout(from: &State, rng: &mut impl Rng) -> i32 {
+    let mut state = from.clone();
+
+    while is_win(&state).is_none() {
+        let plys = valid_plys(&state);
+        let ply = plys.choose(rng).unwrap();
+        perform(&mut state, ply);
     }
 
-    let plys = valid_plys(state);
-    plys.choose(rng);
     return 0;
 }
 
@@ -21,5 +23,5 @@ fn main() {
     let mut rng = rand::thread_rng();
     let mut state = pandemic::create(3);
     pandemic::setup(&mut state);
-    search(&state, &mut rng);
+    playout(&state, &mut rng);
 }

@@ -154,7 +154,7 @@ pub struct Player {
 #[derive(Clone)]
 pub struct State {
     turn: usize,
-    actions_done: usize,
+    actions_taken: usize,
     players: Vec<Player>,
     player_cards: Stack<PlayerCard>,
     player_discard: Stack<PlayerCard>,
@@ -175,7 +175,7 @@ pub fn create(players: usize) -> State  {
     let atlanta = city_by_name("Atlanta").unwrap();
     return State {
         turn: 0,
-        actions_done: 0,
+        actions_taken: 0,
         players: vec![Player { hand: empty(), location: atlanta }; players],
         player_cards: player_cards(),
         player_discard: empty(),
@@ -256,10 +256,7 @@ pub enum Ply {
     Treat(usize),
 }
 
-// Performs given ply on state and returns new state
-pub fn perform(state: &State, ply: Ply) -> State {
-    let state1 = state.clone();
-    return state1;
+pub fn perform(state: &mut State, ply: &Ply) {
 }
 
 fn player_index(state: &State) -> usize {
