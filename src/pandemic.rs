@@ -110,6 +110,115 @@ const CITY_NAMES: &[&str] = &[
   "Sidney",
 ];
 
+type TravelMatrix = [[bool; CITY_DISEASES.len()]; CITY_DISEASES.len()];
+
+fn connect(tm: &mut TravelMatrix, name0: &str, name1: &str) {
+    let city0 = city_by_name(name0).unwrap();
+    let city1 = city_by_name(name1).unwrap();
+    tm[city0][city1] = true;
+    tm[city1][city0] = true;
+}
+
+pub fn map() -> TravelMatrix {
+    let mut tm = [[false; CITY_DISEASES.len()]; CITY_DISEASES.len()];
+    connect(&mut tm, "Atlanta", "Chicago");
+    connect(&mut tm, "Atlanta", "Washington");
+    connect(&mut tm, "Atlanta", "Miami");
+    connect(&mut tm, "Chicago", "San Franscisco");
+    connect(&mut tm, "Chicago", "Los Angeles");
+    connect(&mut tm, "Chicago", "Mexico City");
+    connect(&mut tm, "Chicago", "Montreál");
+    connect(&mut tm, "San Franscisco", "Los Angeles");
+    connect(&mut tm, "San Franscisco", "Tokyo");
+    connect(&mut tm, "San Franscisco", "Manila");
+    connect(&mut tm, "Los Angeles", "Sidney");
+    connect(&mut tm, "Los Angeles", "Mexico City");
+    connect(&mut tm, "Mexico City", "Miami");
+    connect(&mut tm, "Mexico City", "Bogotá");
+    connect(&mut tm, "Mexico City", "Lima");
+    connect(&mut tm, "Montreál", "Washington");
+    connect(&mut tm, "Montreál", "New York");
+    connect(&mut tm, "Washington", "New York");
+    connect(&mut tm, "Washington", "Miami");
+    connect(&mut tm, "Miami", "Bogotá");
+    connect(&mut tm, "Miami", "Bogotá");
+    connect(&mut tm, "Bogotá", "Lima");
+    connect(&mut tm, "Bogotá", "Buenos Aires");
+    connect(&mut tm, "Bogotá", "São Paulo");
+    connect(&mut tm, "Lima", "Santiago");
+    connect(&mut tm, "Buenos Aires", "São Paulo");
+    connect(&mut tm, "São Paulo", "Madrid");
+    connect(&mut tm, "São Paulo", "Lagos");
+    connect(&mut tm, "Lagos", "Kinshasa");
+    connect(&mut tm, "Lagos", "Khartoum");
+    connect(&mut tm, "Kinshasa", "Khartoum");
+    connect(&mut tm, "Kinshasa", "Johannesburg");
+    connect(&mut tm, "Johannesburg", "Khartoum");
+    connect(&mut tm, "New York", "London");
+    connect(&mut tm, "New York", "Madrid");
+    connect(&mut tm, "London", "Essen");
+    connect(&mut tm, "London", "Paris");
+    connect(&mut tm, "London", "Madrid");
+    connect(&mut tm, "Madrid", "Paris");
+    connect(&mut tm, "Madrid", "Algiers");
+    connect(&mut tm, "Paris", "Essen");
+    connect(&mut tm, "Paris", "Milan");
+    connect(&mut tm, "Paris", "Algiers");
+    connect(&mut tm, "Essen", "St. Petersburg");
+    connect(&mut tm, "Essen", "Milan");
+    connect(&mut tm, "Milan", "Istanbul");
+    connect(&mut tm, "St. Petersburg", "Istanbul");
+    connect(&mut tm, "St. Petersburg", "Moscow");
+    connect(&mut tm, "Istanbul", "Moscow");
+    connect(&mut tm, "Istanbul", "Algiers");
+    connect(&mut tm, "Istanbul", "Cairo");
+    connect(&mut tm, "Istanbul", "Baghdad");
+    connect(&mut tm, "Algiers", "Cairo");
+    connect(&mut tm, "Cairo", "Khartoum");
+    connect(&mut tm, "Cairo", "Riyadh");
+    connect(&mut tm, "Cairo", "Baghdad");
+    connect(&mut tm, "Riyadh", "Baghdad");
+    connect(&mut tm, "Riyadh", "Karachi");
+    connect(&mut tm, "Moscow", "Tehran");
+    connect(&mut tm, "Baghdad", "Tehran");
+    connect(&mut tm, "Baghdad", "Karachi");
+    connect(&mut tm, "Tehran", "Delhi");
+    connect(&mut tm, "Tehran", "Karachi");
+    connect(&mut tm, "Karachi", "Delhi");
+    connect(&mut tm, "Karachi", "Mumbai");
+    connect(&mut tm, "Delhi", "Mumbai");
+    connect(&mut tm, "Delhi", "Chennai");
+    connect(&mut tm, "Delhi", "Kolkata");
+    connect(&mut tm, "Mumbai", "Chennai");
+    connect(&mut tm, "Kolkata", "Chennai");
+    connect(&mut tm, "Kolkata", "Bankok");
+    connect(&mut tm, "Kolkata", "Hong Kong");
+    connect(&mut tm, "Chennai", "Bankok");
+    connect(&mut tm, "Chennai", "Jakarta");
+    connect(&mut tm, "Bankok", "Jakarta");
+    connect(&mut tm, "Bankok", "Ho Chi Min City");
+    connect(&mut tm, "Bankok", "Hong Kong");
+    connect(&mut tm, "Jakarta", "Ho Chi Min City");
+    connect(&mut tm, "Jakarta", "Sidney");
+    connect(&mut tm, "Ho Chi Min City", "Hong Kong");
+    connect(&mut tm, "Ho Chi Min City", "Manila");
+    connect(&mut tm, "Hong Kong", "Shanghai");
+    connect(&mut tm, "Hong Kong", "Manila");
+    connect(&mut tm, "Hong Kong", "Taipei");
+    connect(&mut tm, "Manila", "Sidney");
+    connect(&mut tm, "Manila", "Taipei");
+    connect(&mut tm, "Taipei", "Osaka");
+    connect(&mut tm, "Taipei", "Shanghai");
+    connect(&mut tm, "Shanghai", "Bejing");
+    connect(&mut tm, "Shanghai", "Seoul");
+    connect(&mut tm, "Shanghai", "Tokyo");
+    connect(&mut tm, "Bejing", "Seoul");
+    connect(&mut tm, "Seoul", "Tokyo");
+    connect(&mut tm, "Tokyo", "Osaka");
+
+    return tm; 
+}
+
 #[derive(Clone)]
 pub struct Stack<T> {
     cards: Vec<T>,
@@ -264,5 +373,6 @@ fn player_index(state: &State) -> usize {
 }
 
 pub fn valid_plys(state: &State) -> Vec<Ply> {
+    let map = map();
     return vec![];
 }
