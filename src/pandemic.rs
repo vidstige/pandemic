@@ -368,11 +368,27 @@ pub enum Ply {
 pub fn perform(state: &mut State, ply: &Ply) {
 }
 
-fn player_index(state: &State) -> usize {
-    return state.turn % state.players.len();
+fn current_player(state: &State) -> &Player {
+    let player_index = state.turn % state.players.len();
+    return &state.players[player_index];
+}
+
+fn neighbours(tm: &TravelMatrix, city: usize) -> Vec<usize> {
+    let mut c = vec![];
+    for i in 0..CITY_DISEASES.len() {
+        if tm[city][i] {
+            c.push(i);
+        }
+    }
+    return c;
 }
 
 pub fn valid_plys(state: &State) -> Vec<Ply> {
     let map = map();
-    return vec![];
+    let player = current_player(state);
+    let mut plys = vec![];
+    for neighbour in neighbours(&map, player.location) {
+        plys.push(Ply::Drive(neighbour));
+    }
+    return plys;
 }
