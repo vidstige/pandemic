@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 const DISEASES: usize = 4;
 // blue, yellow, black, red
 
@@ -272,6 +274,7 @@ pub struct State {
     infection_cards: Stack<InfectionCard>,
     infection_discard: Stack<InfectionCard>,
     infection_rate: usize,
+    stations: HashSet<usize>,
     cured: [bool; DISEASES],
     cubes: [[usize; CITY_DISEASES.len()]; DISEASES], // cubes per disease
     outbreaks: usize,
@@ -293,6 +296,7 @@ pub fn create(players: usize) -> State  {
         infection_cards: full(),
         infection_discard: empty(),
         infection_rate: 0,
+        stations: HashSet::new(),
         cured: [false; DISEASES],
         cubes: [[0; CITY_DISEASES.len()]; DISEASES],
         outbreaks: 0,
@@ -371,12 +375,21 @@ pub enum Ply {
     DirectFlight(usize),
     CharteredFlight(usize),
     Treat(usize),
+    Cure(usize),
 }
 
 pub fn perform(state: &mut State, ply: &Ply) {
     let player_index = current_player_index(state);
     match ply {
         Ply::Drive(city) => state.players[player_index].location = *city,
+        Ply::Construct(city) => {
+            let hand = &mut state.players[player_index].hand.cards;
+            let index = hand.iter().position(|card| *card == PlayerCard::City(*city)).unwrap();
+            hand.remove(index);
+            state.stations.insert(*city);
+        }
+        Ply::Cure(disease) => {
+        }
         _ => (),
     }
     state.actions_taken += 1;
@@ -405,12 +418,30 @@ fn neighbours(tm: &TravelMatrix, city: usize) -> Vec<usize> {
     return c;
 }
 
+fn matches_disease(player_card: &PlayerCard, disease: usize) -> bool {
+    match player_card {
+        PlayerCard::City(city) => CITY_DISEASES[*city] == disease,
+    }
+}
+
 pub fn valid_plys(state: &State) -> Vec<Ply> {
+    // movement
     let map = map();
     let player = &state.players[current_player_index(state)];
     let mut plys = vec![];
     for neighbour in neighbours(&map, player.location) {
         plys.push(Ply::Drive(neighbour));
+    }
+
+    // cure disease, if at station
+    if state.stations.contains(&player.location) {
+        for disease in 0..DISEASES {
+            let c = player.hand.cards.iter().filter(|&card| matches_disease(card, disease)).count();
+            if c >= 5 {
+                // TODO: Add one ply for each way to disacard five cards
+                plys.push(Ply::Cure(disease));
+            }
+        }
     }
     return plys;
 }
