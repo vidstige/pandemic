@@ -2,7 +2,7 @@ const DISEASES: usize = 4;
 // blue, yellow, black, red
 
 #[derive(Clone)]
-enum PlayerCard {
+pub enum PlayerCard {
     City(usize),
 }
 
@@ -230,13 +230,15 @@ trait Drawable<T> {
 
 impl Drawable<InfectionCard> for Stack<InfectionCard> {
     fn draw(&mut self) -> Option<InfectionCard> {
-        return self.cards.drain((self.cards.len() - 1)..).next();
+        let last = self.cards.len().saturating_sub(1);
+        return self.cards.drain(last..).next();
     }
 }
 
 impl Drawable<PlayerCard> for Stack<PlayerCard> {
     fn draw(&mut self) -> Option<PlayerCard> {
-        return self.cards.drain((self.cards.len() - 1)..).next();
+        let last = self.cards.len().saturating_sub(1);
+        return self.cards.drain(last..).next();
     }
 }
 
@@ -348,7 +350,13 @@ pub fn is_win(state: &State) -> Option<bool> {
             return Some(false);
         }
     }
-    // TODO: Players loose if player card is empty at end of turn
+    
+    // TODO: buggy - add end turn ply instead of using 3 here
+    if state.actions_taken >= 3 {  // end of turn
+        if state.player_cards.cards.is_empty() {
+            return Some(false);
+        }        
+    }
 
     // Players win if all diseases are cured
     if state.cured.iter().all(|&b| b) {
@@ -366,11 +374,25 @@ pub enum Ply {
 }
 
 pub fn perform(state: &mut State, ply: &Ply) {
+    let player_index = current_player_index(state);
+    match ply {
+        Ply::Drive(city) => state.players[player_index].location = *city,
+        _ => (),
+    }
+    state.actions_taken += 1;
+    
+    if state.actions_taken >= 4 {
+        // 1. Draw two player cards
+        deal(&mut state.player_cards, &mut state.players[player_index].hand);
+        deal(&mut state.player_cards, &mut state.players[player_index].hand);
+
+        state.turn += 1;
+        state.actions_taken = 0;
+    }
 }
 
-fn current_player(state: &State) -> &Player {
-    let player_index = state.turn % state.players.len();
-    return &state.players[player_index];
+fn current_player_index(state: &State) -> usize {
+    return state.turn % state.players.len();
 }
 
 fn neighbours(tm: &TravelMatrix, city: usize) -> Vec<usize> {
@@ -385,7 +407,7 @@ fn neighbours(tm: &TravelMatrix, city: usize) -> Vec<usize> {
 
 pub fn valid_plys(state: &State) -> Vec<Ply> {
     let map = map();
-    let player = current_player(state);
+    let player = &state.players[current_player_index(state)];
     let mut plys = vec![];
     for neighbour in neighbours(&map, player.location) {
         plys.push(Ply::Drive(neighbour));

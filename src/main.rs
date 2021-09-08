@@ -15,6 +15,7 @@ fn playout(from: &State, rng: &mut impl Rng) -> i32 {
         let ply = plys.choose(rng).unwrap();
         perform(&mut state, ply);
     }
+    println!("outcome: {:?}", if is_win(&state).unwrap() { "win" } else { "loss" });
 
     return 0;
 }
