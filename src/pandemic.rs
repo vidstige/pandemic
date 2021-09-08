@@ -3,7 +3,7 @@ use std::collections::HashSet;
 const DISEASES: usize = 4;
 // blue, yellow, black, red
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum PlayerCard {
     City(usize),
 }
@@ -376,6 +376,7 @@ pub enum Ply {
     CharteredFlight(usize),
     Treat(usize),
     Cure(usize),
+    Construct(usize),
 }
 
 pub fn perform(state: &mut State, ply: &Ply) {
@@ -431,6 +432,15 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
     let mut plys = vec![];
     for neighbour in neighbours(&map, player.location) {
         plys.push(Ply::Drive(neighbour));
+    }
+
+    // build station
+    for card in &player.hand.cards {
+        if let PlayerCard::City(city) = card {
+            if player.location == *city {
+                plys.push(Ply::Construct(*city));
+            }
+        }
     }
 
     // cure disease, if at station
