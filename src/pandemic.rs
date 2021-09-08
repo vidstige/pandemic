@@ -315,6 +315,11 @@ fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
     }
 }
 
+fn discard<T: std::cmp::PartialEq>(deck: &mut Stack<T>, card: &T) {
+    let index = deck.cards.iter().position(|c| c == card).unwrap();
+    deck.cards.remove(index);
+}
+
 pub fn setup(state: &mut State) {
     // Shuffle player cards
 
@@ -384,9 +389,8 @@ pub fn perform(state: &mut State, ply: &Ply) {
     match ply {
         Ply::Drive(city) => state.players[player_index].location = *city,
         Ply::Construct(city) => {
-            let hand = &mut state.players[player_index].hand.cards;
-            let index = hand.iter().position(|card| *card == PlayerCard::City(*city)).unwrap();
-            hand.remove(index);
+            let hand = &mut state.players[player_index].hand;
+            discard(hand, &PlayerCard::City(*city));
             state.stations.insert(*city);
         }
         Ply::Cure(disease) => {
