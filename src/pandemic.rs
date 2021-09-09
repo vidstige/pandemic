@@ -382,7 +382,7 @@ pub enum Ply {
     Drive(CityIndex),
     DirectFlight(CityIndex),
     CharteredFlight(CityIndex),
-    Treat(CityIndex),
+    Treat(DiseaseIndex, CityIndex),
     Cure(DiseaseIndex),
     Construct(CityIndex),
 }
@@ -391,6 +391,9 @@ pub fn perform(state: &mut State, ply: &Ply) {
     let player_index = current_player_index(state);
     match ply {
         Ply::Drive(city) => state.players[player_index].location = *city,
+        Ply::Treat(disease, city) => {
+            state.cubes[*disease][*city] -= 1;
+        }
         Ply::Construct(city) => {
             let hand = &mut state.players[player_index].hand;
             discard(hand, &PlayerCard::City(*city));
@@ -439,6 +442,13 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
     let mut plys = vec![];
     for neighbour in neighbours(&map, player.location) {
         plys.push(Ply::Drive(neighbour));
+    }
+
+    // treat
+    for disease in 0..DISEASES {
+        if state.cubes[disease][player.location] > 0 {
+            plys.push(Ply::Treat(disease, player.location));
+        }
     }
 
     // build station
