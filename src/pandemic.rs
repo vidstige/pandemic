@@ -453,10 +453,12 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
     // cure disease, if at station
     if state.stations.contains(&player.location) {
         for disease in 0..DISEASES {
-            let c = player.hand.cards.iter().filter(|&card| matches_disease(card, disease)).count();
-            if c >= 5 {
-                // TODO: Add one ply for each way to disacard five cards
-                plys.push(Ply::Cure(disease));
+            if !state.cured[disease] {
+                let c = player.hand.cards.iter().filter(|&card| matches_disease(card, disease)).count();
+                if c >= 5 {
+                    // TODO: Add one ply for each way to disacard five cards
+                    plys.push(Ply::Cure(disease));
+                }
             }
         }
     }
