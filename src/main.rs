@@ -18,7 +18,7 @@ impl fmt::Display for Ply {
             Ply::DirectFlight(city) => write!(f, "Direct flight to {:?}", city_name(city)),
             Ply::CharteredFlight(city) => write!(f, "Chartered flight to {:?}", city_name(city)),
             Ply::Treat(disease, city) => write!(f, "Treat {:?} in {:?}", disease, city_name(city)),
-            Ply::Cure(disease) => write!(f, "Cure {:?}", disease),
+            Ply::Cure(disease, _) => write!(f, "Cure {:?}", disease),
             Ply::Construct(city) => write!(f, "Construct station in {:?}", city_name(city)),
        }
     }

@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use itertools::Itertools;
 
 const DISEASES: usize = 4;
 // blue, yellow, black, red
@@ -6,7 +7,7 @@ const DISEASES: usize = 4;
 pub type CityIndex = usize;
 pub type DiseaseIndex = usize;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum PlayerCard {
     City(CityIndex),
 }
@@ -387,7 +388,7 @@ pub enum Ply {
     DirectFlight(CityIndex),
     CharteredFlight(CityIndex),
     Treat(DiseaseIndex, CityIndex),
-    Cure(DiseaseIndex),
+    Cure(DiseaseIndex, [PlayerCard; 5]),
     Construct(CityIndex),
 }
 
@@ -403,7 +404,13 @@ pub fn perform(state: &mut State, ply: &Ply) {
             discard(hand, &PlayerCard::City(*city));
             state.stations.insert(*city);
         }
-        Ply::Cure(disease) => {
+        Ply::Cure(disease, cards) => {
+            // Discard five cards
+            let hand = &mut state.players[player_index].hand;
+            for card in cards {
+                discard(hand, card);
+            }
+            state.cured[*disease] = true;
         }
         _ => (),
     }
@@ -468,10 +475,21 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
     if state.stations.contains(&player.location) {
         for disease in 0..DISEASES {
             if !state.cured[disease] {
-                let c = player.hand.cards.iter().filter(|&card| matches_disease(card, disease)).count();
-                if c >= 5 {
-                    // TODO: Add one ply for each way to disacard five cards
-                    plys.push(Ply::Cure(disease));
+                // Iterate through all possible ways to select five cards
+                // from of the same color from the hand
+                let combinations = player.hand.cards
+                    .iter()
+                    .filter(|&card| matches_disease(card, disease))
+                    .combinations(5);
+                for combination in combinations {
+                    let cards: [PlayerCard; 5] = [
+                        combination[0].clone(),
+                        combination[1].clone(),
+                        combination[2].clone(),
+                        combination[3].clone(),
+                        combination[4].clone(),
+                    ];
+                    plys.push(Ply::Cure(disease, cards));
                 }
             }
         }
