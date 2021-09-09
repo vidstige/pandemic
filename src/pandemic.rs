@@ -3,12 +3,15 @@ use std::collections::HashSet;
 const DISEASES: usize = 4;
 // blue, yellow, black, red
 
+pub type CityIndex = usize;
+pub type DiseaseIndex = usize;
+
 #[derive(Clone, PartialEq)]
 pub enum PlayerCard {
-    City(usize),
+    City(CityIndex),
 }
 
-pub type InfectionCard = usize; // index to cities array
+pub type InfectionCard = CityIndex; // index to cities array
 
 const CITY_DISEASES: [usize; 48] = [
     0,
@@ -280,7 +283,7 @@ pub struct State {
     outbreaks: usize,
 }
 
-fn city_by_name(name: &str) -> Option<usize> {
+fn city_by_name(name: &str) -> Option<CityIndex> {
     return CITY_NAMES.iter().position(|&city| city == name);
 }
 
@@ -343,7 +346,7 @@ pub fn setup(state: &mut State) {
     }
 }
 
-fn cubes_of(state: &State, disease: usize) -> usize {
+fn cubes_of(state: &State, disease: DiseaseIndex) -> usize {
     return state.cubes[disease].iter().sum();
 }
 
@@ -376,12 +379,12 @@ pub fn is_win(state: &State) -> Option<bool> {
 }
 
 pub enum Ply {
-    Drive(usize),
-    DirectFlight(usize),
-    CharteredFlight(usize),
-    Treat(usize),
-    Cure(usize),
-    Construct(usize),
+    Drive(CityIndex),
+    DirectFlight(CityIndex),
+    CharteredFlight(CityIndex),
+    Treat(CityIndex),
+    Cure(DiseaseIndex),
+    Construct(CityIndex),
 }
 
 pub fn perform(state: &mut State, ply: &Ply) {
@@ -413,7 +416,7 @@ fn current_player_index(state: &State) -> usize {
     return state.turn % state.players.len();
 }
 
-fn neighbours(tm: &TravelMatrix, city: usize) -> Vec<usize> {
+fn neighbours(tm: &TravelMatrix, city: CityIndex) -> Vec<CityIndex> {
     let mut c = vec![];
     for i in 0..CITY_DISEASES.len() {
         if tm[city][i] {
@@ -423,7 +426,7 @@ fn neighbours(tm: &TravelMatrix, city: usize) -> Vec<usize> {
     return c;
 }
 
-fn matches_disease(player_card: &PlayerCard, disease: usize) -> bool {
+fn matches_disease(player_card: &PlayerCard, disease: DiseaseIndex) -> bool {
     match player_card {
         PlayerCard::City(city) => CITY_DISEASES[*city] == disease,
     }
