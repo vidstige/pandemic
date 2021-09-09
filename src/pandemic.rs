@@ -115,6 +115,10 @@ const CITY_NAMES: &[&str] = &[
   "Sidney",
 ];
 
+pub fn city_name(city: CityIndex) -> &'static str {
+    return CITY_NAMES[city];
+}
+
 type TravelMatrix = [[bool; CITY_DISEASES.len()]; CITY_DISEASES.len()];
 
 fn connect(tm: &mut TravelMatrix, name0: &str, name1: &str) {
