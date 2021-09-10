@@ -384,6 +384,7 @@ pub fn is_win(state: &State) -> Option<bool> {
 }
 
 pub enum Ply {
+    Discard(usize, usize), // player index & card index
     Drive(CityIndex),
     DirectFlight(CityIndex),
     CharteredFlight(CityIndex),
@@ -395,6 +396,9 @@ pub enum Ply {
 pub fn perform(state: &mut State, ply: &Ply) {
     let player_index = current_player_index(state);
     match ply {
+        Ply::Discard(player_index, card_index) => {
+            state.players[*player_index].hand.cards.remove(*card_index);
+        }
         Ply::Drive(city) => state.players[player_index].location = *city,
         Ply::Treat(disease, city) => {
             state.cubes[*disease][*city] -= 1;
@@ -447,10 +451,18 @@ fn matches_disease(player_card: &PlayerCard, disease: DiseaseIndex) -> bool {
 }
 
 pub fn valid_plys(state: &State) -> Vec<Ply> {
+    let mut plys = vec![];
+    // if ANY player have more than 7 cards - they need to discard
+    for (player_index, player) in state.players.iter().enumerate() {
+        let n = player.hand.cards.len();
+        if n > 7 {
+            return (0..n).map(|i| Ply::Discard(player_index, i)).collect();
+        }        
+    }
+    
     // movement
     let map = map();
     let player = &state.players[current_player_index(state)];
-    let mut plys = vec![];
     for neighbour in neighbours(&map, player.location) {
         plys.push(Ply::Drive(neighbour));
     }

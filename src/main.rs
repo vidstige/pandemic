@@ -14,6 +14,7 @@ use pandemic::city_name;
 impl fmt::Display for Ply {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            Ply::Discard(player_index, card_index) => write!(f, "Player {:?} discards cards #{:?}", player_index, card_index),
             Ply::Drive(city) => write!(f, "Drive to {:?}", city_name(city)),
             Ply::DirectFlight(city) => write!(f, "Direct flight to {:?}", city_name(city)),
             Ply::CharteredFlight(city) => write!(f, "Chartered flight to {:?}", city_name(city)),
