@@ -12,6 +12,8 @@ pub enum PlayerCard {
     City(CityIndex),
 }
 
+const INFECTION_RATES: [usize; 7] = [2, 2, 2, 3, 3, 4, 4];
+
 pub type InfectionCard = CityIndex; // index to cities array
 
 const CITY_DISEASES: [usize; 48] = [
@@ -311,9 +313,36 @@ pub fn create(players: usize) -> State  {
      };
 }
 
+// Recursively handles outbreaks
+fn _infect(state: &mut State, disease: DiseaseIndex, city: CityIndex, outbreaked: &mut HashSet<CityIndex>) {
+    if state.cubes[disease][city] < 3 {
+        state.cubes[disease][city] += 1;
+    } else {
+        // If there already was an outbreak here, do nothing
+        if outbreaked.contains(&city) {
+            return;
+        }
+        outbreaked.insert(city);
+        // Outbreak!
+        println!("Outbreak!");
+        
+        // 1. Infect city with three cubes
+        state.cubes[disease][city] = 3;
+        // 2. Infect all neighbours with one cube
+        for neighbour in neighbours(&map(), city) {
+            _infect(state, disease, neighbour, outbreaked);
+        }
+        // 3. Increase outbreak counter
+        state.outbreaks += 1;
+    }
+}
+
 fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
     let disease = CITY_DISEASES[infection_card];
-    state.cubes[disease][infection_card] += n;
+    let mut outbreaked = HashSet::new();
+    for _ in 0..n {
+        _infect(state, disease, infection_card, &mut outbreaked);
+    }
 }
 
 fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
@@ -424,6 +453,12 @@ pub fn perform(state: &mut State, ply: &Ply) {
         deal(&mut state.player_cards, &mut state.players[player_index].hand);
         
         // 2. Draw infection cards
+        for _ in 0..INFECTION_RATES[state.infection_rate] {
+            // TODO: What if we run out of infection cards?
+            let infection_card = state.infection_cards.draw().unwrap(); 
+            println!("Infection in {:?}", CITY_NAMES[infection_card]);
+            infect(state, infection_card, 1);
+        }
 
         // 3. Get ready for next turn
         state.turn += 1;
