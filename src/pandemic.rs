@@ -311,9 +311,9 @@ pub fn create(players: usize) -> State  {
      };
 }
 
-fn infect(state: &mut State, infection_card: InfectionCard) {
+fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
     let disease = CITY_DISEASES[infection_card];
-    state.cubes[disease][infection_card] += 1;
+    state.cubes[disease][infection_card] += n;
 }
 
 fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
@@ -344,9 +344,7 @@ pub fn setup(state: &mut State) {
     for i in 0..3 {
         for _ in 0..3 {
             let infection_card = state.infection_cards.draw().unwrap();
-            for _ in 0..(3 - i) {
-                infect(state, infection_card);
-            }
+            infect(state, infection_card, 3 - i);
         }
     }
 }
@@ -424,7 +422,10 @@ pub fn perform(state: &mut State, ply: &Ply) {
         // 1. Draw two player cards
         deal(&mut state.player_cards, &mut state.players[player_index].hand);
         deal(&mut state.player_cards, &mut state.players[player_index].hand);
+        
+        // 2. Draw infection cards
 
+        // 3. Get ready for next turn
         state.turn += 1;
         state.actions_taken = 0;
     }
