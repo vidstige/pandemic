@@ -2,6 +2,9 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 use super::cards::Stack;
+use super::cards::Drawable;
+use super::cards::deal;
+use super::cards::discard;
 
 const DISEASES: usize = 4;
 // blue, yellow, black, red
@@ -233,24 +236,6 @@ pub fn map() -> TravelMatrix {
     return tm; 
 }
 
-trait Drawable<T> {
-    fn draw(&mut self) -> Option<T>;
-}
-
-impl Drawable<InfectionCard> for Stack<InfectionCard> {
-    fn draw(&mut self) -> Option<InfectionCard> {
-        let last = self.cards.len().saturating_sub(1);
-        return self.cards.drain(last..).next();
-    }
-}
-
-impl Drawable<PlayerCard> for Stack<PlayerCard> {
-    fn draw(&mut self) -> Option<PlayerCard> {
-        let last = self.cards.len().saturating_sub(1);
-        return self.cards.drain(last..).next();
-    }
-}
-
 fn empty<T>() -> Stack<T> {
     return Stack { cards: vec![] };
 }
@@ -340,18 +325,6 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
     for _ in 0..n {
         _infect(state, disease, infection_card, &mut outbreaked);
     }
-}
-
-fn deal(deck: &mut Stack<PlayerCard>, hand: &mut Stack<PlayerCard>) {
-    match deck.draw() {
-        Some(card) => hand.cards.push(card),
-        None => (),
-    }
-}
-
-fn discard<T: std::cmp::PartialEq>(deck: &mut Stack<T>, card: &T) {
-    let index = deck.cards.iter().position(|c| c == card).unwrap();
-    deck.cards.remove(index);
 }
 
 pub fn setup(state: &mut State) {
