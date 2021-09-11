@@ -21,7 +21,7 @@ pub fn deal<T>(deck: &mut Stack<T>, hand: &mut Stack<T>) {
     }
 }
 
-pub fn discard<T: std::cmp::PartialEq>(deck: &mut Stack<T>, card: &T) {
+pub fn discard<T: std::cmp::PartialEq>(deck: &mut Stack<T>, card: &T, discard: &mut Stack<T>) {
     let index = deck.cards.iter().position(|c| c == card).unwrap();
-    deck.cards.remove(index);
+    discard.cards.push(deck.cards.remove(index));
 }

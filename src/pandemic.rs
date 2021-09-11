@@ -402,14 +402,14 @@ pub fn perform(state: &mut State, ply: &Ply) {
         }
         Ply::Construct(city) => {
             let hand = &mut state.players[player_index].hand;
-            discard(hand, &PlayerCard::City(*city));
+            discard(hand, &PlayerCard::City(*city), &mut state.player_discard);
             state.stations.insert(*city);
         }
         Ply::Cure(disease, cards) => {
             // Discard five cards
             let hand = &mut state.players[player_index].hand;
             for card in cards {
-                discard(hand, card);
+                discard(hand, card, &mut state.player_discard);
             }
             state.cured[*disease] = true;
         }
