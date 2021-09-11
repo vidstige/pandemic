@@ -3,6 +3,7 @@ use rand::Rng;
 use rand::seq::SliceRandom;
 
 mod pandemic;
+mod cards;
 
 use pandemic::State;
 use pandemic::Ply;

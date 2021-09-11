@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use itertools::Itertools;
 
+use super::cards::Stack;
+
 const DISEASES: usize = 4;
 // blue, yellow, black, red
 
@@ -229,11 +231,6 @@ pub fn map() -> TravelMatrix {
     connect(&mut tm, "Tokyo", "Osaka");
 
     return tm; 
-}
-
-#[derive(Clone)]
-pub struct Stack<T> {
-    cards: Vec<T>,
 }
 
 trait Drawable<T> {
