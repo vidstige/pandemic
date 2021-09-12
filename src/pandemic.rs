@@ -5,6 +5,7 @@ use super::cards::Stack;
 use super::cards::Drawable;
 use super::cards::deal;
 use super::cards::discard;
+use super::cards::stack;
 
 const DISEASES: usize = 4;
 // blue, yellow, black, red
@@ -396,6 +397,23 @@ pub enum Ply {
     Construct(CityIndex),
 }
 
+fn epidemic(state: &mut State) {
+    println!("Epidemic!");
+
+    // 1. Draw bottom card
+    // TODO: What to do if infection deck is empty?
+    let card = state.infection_cards.draw_bottom().unwrap();
+
+    // 2. Infect with three cubes
+    infect(state, card, 3);
+
+    // 3. Discard
+    state.infection_discard.cards.push(card);
+
+    // 4. Add infection discard pile to infection deck
+    stack(&mut state.infection_cards, &mut state.infection_discard);
+}
+
 pub fn perform(state: &mut State, ply: &Ply) {
     let player_index = current_player_index(state);
     match ply {
@@ -425,8 +443,17 @@ pub fn perform(state: &mut State, ply: &Ply) {
     
     if state.actions_taken >= 4 {
         // 1. Draw two player cards
-        deal(&mut state.player_cards, &mut state.players[player_index].hand);
-        deal(&mut state.player_cards, &mut state.players[player_index].hand);
+        for _ in 0..2 {
+            let hand = &mut state.players[player_index].hand;
+            match state.player_cards.draw() {
+                Some(card) => 
+                    match card {
+                        PlayerCard::City(_) => hand.cards.push(card),
+                        PlayerCard::Epidemic => epidemic(state),
+                    },
+                None => (),
+            }
+        }
         
         // 2. Draw infection cards
         for _ in 0..INFECTION_RATES[state.infection_rate] {
@@ -434,6 +461,7 @@ pub fn perform(state: &mut State, ply: &Ply) {
             let infection_card = state.infection_cards.draw().unwrap(); 
             println!("Infection in {:?}", CITY_NAMES[infection_card]);
             infect(state, infection_card, 1);
+            state.infection_discard.cards.push(infection_card);
         }
 
         // 3. Get ready for next turn
