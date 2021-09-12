@@ -1,5 +1,6 @@
 use std::fmt;
-use rand::Rng;
+use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 
 mod pandemic;
@@ -41,7 +42,8 @@ fn playout(from: &State, rng: &mut impl Rng) -> i32 {
 }
 
 fn main() {
-    let mut rng = rand::thread_rng();
+    let seed: [u8; 32] = [17; 32]; // fixed seed
+    let mut rng: StdRng = SeedableRng::from_seed(seed);
     let mut state = pandemic::create(3);
     pandemic::setup(&mut state, 4);
     playout(&state, &mut rng);
