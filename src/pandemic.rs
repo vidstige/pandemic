@@ -15,6 +15,7 @@ pub type DiseaseIndex = usize;
 #[derive(Clone, PartialEq, Debug)]
 pub enum PlayerCard {
     City(CityIndex),
+    Epidemic,
 }
 
 const INFECTION_RATES: [usize; 7] = [2, 2, 2, 3, 3, 4, 4];
@@ -327,9 +328,14 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
     }
 }
 
-pub fn setup(state: &mut State) {
-    // Shuffle player cards
-
+pub fn setup(state: &mut State, epidemic_cards: usize) {
+    // Insert epidemic cards
+    let n = state.player_cards.cards.len();
+    for i in 0..epidemic_cards {
+        let index = n * i / epidemic_cards;
+        state.player_cards.cards.insert(index, PlayerCard::Epidemic);
+    }
+    
     // Deal player cards
     let n = 6 - state.players.len();
     for player in &mut state.players {
@@ -453,6 +459,7 @@ fn neighbours(tm: &TravelMatrix, city: CityIndex) -> Vec<CityIndex> {
 fn matches_disease(player_card: &PlayerCard, disease: DiseaseIndex) -> bool {
     match player_card {
         PlayerCard::City(city) => CITY_DISEASES[*city] == disease,
+        PlayerCard::Epidemic => false,
     }
 }
 

@@ -43,6 +43,6 @@ fn playout(from: &State, rng: &mut impl Rng) -> i32 {
 fn main() {
     let mut rng = rand::thread_rng();
     let mut state = pandemic::create(3);
-    pandemic::setup(&mut state);
+    pandemic::setup(&mut state, 4);
     playout(&state, &mut rng);
 }
