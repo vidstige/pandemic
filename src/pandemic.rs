@@ -5,7 +5,7 @@ use super::cards::Stack;
 use super::cards::Drawable;
 use super::cards::deal;
 use super::cards::discard;
-use super::cards::stack;
+use super::cards;
 
 const DISEASES: usize = 4;
 // blue, yellow, black, red
@@ -330,12 +330,14 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
 }
 
 pub fn setup(state: &mut State, epidemic_cards: usize) {
+    let mut epidemic_stack = Stack { cards: vec![PlayerCard::Epidemic; epidemic_cards]};
     // Insert epidemic cards
-    let n = state.player_cards.cards.len();
-    for i in 0..epidemic_cards {
-        let index = n * i / epidemic_cards;
-        state.player_cards.cards.insert(index, PlayerCard::Epidemic);
+    let mut stacks = cards::split(&mut state.player_cards, epidemic_stack.cards.len());
+    for stack in &mut stacks {
+        deal(&mut epidemic_stack, stack);
     }
+    state.player_cards = cards::combine(&mut stacks);
+
     
     // Deal player cards
     let n = 6 - state.players.len();
@@ -411,7 +413,7 @@ fn epidemic(state: &mut State) {
     state.infection_discard.cards.push(card);
 
     // 4. Add infection discard pile to infection deck
-    stack(&mut state.infection_cards, &mut state.infection_discard);
+    cards::stack(&mut state.infection_cards, &mut state.infection_discard);
 }
 
 pub fn perform(state: &mut State, ply: &Ply) {

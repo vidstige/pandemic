@@ -34,3 +34,20 @@ pub fn discard<T: std::cmp::PartialEq>(deck: &mut Stack<T>, card: &T, discard: &
 pub fn stack<T>(target: &mut Stack<T>, source: &mut Stack<T>) {
     target.cards.append(&mut source.cards);
 }
+
+pub fn split<T>(stack: &mut Stack<T>, n: usize) -> Vec<Stack<T>> {
+    let mut stacks = vec!();
+    let chunk_size = stack.cards.len() / n;
+    while !stack.cards.is_empty() {
+        stacks.push(Stack { cards: stack.cards.drain(0..chunk_size).collect() });
+    }
+    return stacks;
+}
+
+pub fn combine<T>(stacks: &mut Vec<Stack<T>>) -> Stack<T> {
+    let mut combined = Stack { cards: vec!() };
+    for stack in stacks {
+        combined.cards.append(&mut stack.cards);
+    }
+    return combined;
+}
