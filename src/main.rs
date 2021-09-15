@@ -27,17 +27,23 @@ impl fmt::Display for Ply {
     }
 }
 
+fn average(numbers: &Vec<usize>) -> f32 {
+    numbers.iter().sum::<usize>() as f32 / numbers.len() as f32
+}
+
 fn playout(from: &State, rng: &mut impl Rng) -> i32 {
     let mut state = from.clone();
 
+    let mut ns = vec!();
     while is_win(&state).is_none() {
         let plys = valid_plys(&state);
+        ns.push(plys.len());
         let ply = plys.choose(rng).unwrap();
         println!("{}", ply);
         perform(&mut state, ply);
     }
     println!("outcome: {:?}", if is_win(&state).unwrap() { "win" } else { "loss" });
-
+    println!("average branch factor: {:?}", average(&ns));
     return 0;
 }
 
