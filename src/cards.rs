@@ -14,9 +14,12 @@ impl<T> FlatStack<T> {
 pub trait Stack<T>: Sized {
     fn is_empty(&self) -> bool;
     fn len(&self) -> usize;
+    fn push(&mut self, card: T);
+}
+
+pub trait Deck<T>: Stack<T> {
     fn draw(&mut self) -> Option<T>;
     fn draw_bottom(&mut self) -> Option<T>;
-    fn push(&mut self, card: T);
     fn split(&mut self, n: usize) -> Vec<Self>;
 }
 
@@ -26,7 +29,6 @@ pub trait Hand<T>: Stack<T> {
     fn discard(&mut self, card: &T, discard: &mut Self);
 }
 
-
 impl<T: PartialEq> Stack<T> for FlatStack<T> {
     fn is_empty(&self) -> bool {
         self.cards.is_empty()
@@ -34,15 +36,18 @@ impl<T: PartialEq> Stack<T> for FlatStack<T> {
     fn len(&self) -> usize {
         self.cards.len()
     }
+    fn push(&mut self, card: T) {
+        self.cards.push(card);
+    }
+}
+
+impl<T: PartialEq> Deck<T> for FlatStack<T> {
     fn draw(&mut self) -> Option<T> {
         let last = self.cards.len().saturating_sub(1);
         return self.cards.drain(last..).next();
     }
     fn draw_bottom(&mut self) -> Option<T> {
         return self.cards.drain(0..1).next();
-    }
-    fn push(&mut self, card: T) {
-        self.cards.push(card);
     }
     fn split(&mut self, n: usize) -> Vec<Self> {
         let mut stacks = vec!();
@@ -52,7 +57,6 @@ impl<T: PartialEq> Stack<T> for FlatStack<T> {
         }
         return stacks;
     }
-    
 }
 
 impl<T: PartialEq> Hand<T> for FlatStack<T> {
@@ -72,7 +76,7 @@ pub fn empty_stack<T>() -> FlatStack<T> {
     return FlatStack{ cards: vec!() };
 }
 
-pub fn deal<T, S: Stack<T>>(deck: &mut S, hand: &mut S) {
+pub fn deal<T, S: Deck<T>>(deck: &mut S, hand: &mut S) {
     match deck.draw() {
         Some(card) => hand.push(card),
         None => (),
@@ -80,7 +84,7 @@ pub fn deal<T, S: Stack<T>>(deck: &mut S, hand: &mut S) {
 }
 
 // Stacks the source on top of target. Source will be empty after
-pub fn stack<T, S: Stack<T>>(target: &mut S, source: &mut S) {
+pub fn stack<T, S: Deck<T>>(target: &mut S, source: &mut S) {
     while !source.is_empty() {
         target.push(source.draw().unwrap());
     }

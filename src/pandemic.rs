@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use itertools::Itertools;
 
-use super::cards::{Hand, Stack, FlatStack};
+use super::cards::{Deck, Hand, Stack, FlatStack};
 use super::cards::{deal, empty_stack};
 use super::cards;
 
