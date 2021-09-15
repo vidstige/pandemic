@@ -326,7 +326,7 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
 pub fn setup(state: &mut State, epidemic_cards: usize) {
     let mut epidemic_stack = FlatStack { cards: vec![PlayerCard::Epidemic; epidemic_cards]};
     // Insert epidemic cards
-    let mut stacks = state.player_cards.split(epidemic_stack.cards.len());
+    let mut stacks = state.player_cards.split(epidemic_stack.len());
     for stack in &mut stacks {
         deal(&mut epidemic_stack, stack);
     }
@@ -370,7 +370,7 @@ pub fn is_win(state: &State) -> Option<bool> {
     
     // TODO: buggy - add end turn ply instead of using 3 here
     if state.actions_taken >= 3 {  // end of turn
-        if state.player_cards.cards.is_empty() {
+        if state.player_cards.is_empty() {
             return Some(false);
         }        
     }
@@ -404,7 +404,7 @@ fn epidemic(state: &mut State) {
     infect(state, card, 3);
 
     // 3. Discard
-    state.infection_discard.cards.push(card);
+    state.infection_discard.push(card);
 
     // 4. Add infection discard pile to infection deck
     cards::stack(&mut state.infection_cards, &mut state.infection_discard);
@@ -414,7 +414,7 @@ pub fn perform(state: &mut State, ply: &Ply) {
     let player_index = current_player_index(state);
     match ply {
         Ply::Discard(player_index, card_index) => {
-            state.players[*player_index].hand.cards.remove(*card_index);
+            state.players[*player_index].hand.discard_at(*card_index, &mut state.player_discard);
         }
         Ply::Drive(city) => state.players[player_index].location = *city,
         Ply::Treat(disease, city) => {
@@ -444,7 +444,7 @@ pub fn perform(state: &mut State, ply: &Ply) {
             match state.player_cards.draw() {
                 Some(card) => 
                     match card {
-                        PlayerCard::City(_) => hand.cards.push(card),
+                        PlayerCard::City(_) => hand.push(card),
                         PlayerCard::Epidemic => epidemic(state),
                     },
                 None => (),
@@ -457,7 +457,7 @@ pub fn perform(state: &mut State, ply: &Ply) {
             let infection_card = state.infection_cards.draw().unwrap(); 
             println!("Infection in {:?}", CITY_NAMES[infection_card]);
             infect(state, infection_card, 1);
-            state.infection_discard.cards.push(infection_card);
+            state.infection_discard.push(infection_card);
         }
 
         // 3. Get ready for next turn
@@ -491,7 +491,7 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
     let mut plys = vec![];
     // if ANY player have more than 7 cards - they need to discard
     for (player_index, player) in state.players.iter().enumerate() {
-        let n = player.hand.cards.len();
+        let n = player.hand.len();
         if n > 7 {
             return (0..n).map(|i| Ply::Discard(player_index, i)).collect();
         }        

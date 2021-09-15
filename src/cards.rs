@@ -5,16 +5,21 @@ pub struct FlatStack<T> {
 
 pub trait Stack<T>: Sized {
     fn is_empty(&self) -> bool;
+    fn len(&self) -> usize;
     fn draw(&mut self) -> Option<T>;
     fn draw_bottom(&mut self) -> Option<T>;
     fn push(&mut self, card: T);
+    fn discard_at(&mut self, index: usize, discard: &mut Self);
     fn discard(&mut self, card: &T, discard: &mut Self);
     fn split(&mut self, n: usize) -> Vec<Self>;
 }
 
 impl<T: PartialEq> Stack<T> for FlatStack<T> {
     fn is_empty(&self) -> bool {
-        return self.cards.is_empty();
+        self.cards.is_empty()
+    }
+    fn len(&self) -> usize {
+        self.cards.len()
     }
     fn draw(&mut self) -> Option<T> {
         let last = self.cards.len().saturating_sub(1);
@@ -23,9 +28,12 @@ impl<T: PartialEq> Stack<T> for FlatStack<T> {
     fn draw_bottom(&mut self) -> Option<T> {
         return self.cards.drain(0..1).next();
     }
+    fn discard_at(&mut self, index: usize, discard: &mut Self) {
+        discard.cards.push(self.cards.remove(index));
+    }
     fn discard(&mut self, card: &T, discard: &mut Self) {
         let index = self.cards.iter().position(|c| c == card).unwrap();
-        discard.cards.push(self.cards.remove(index));
+        self.discard_at(index, discard);
     }
     fn push(&mut self, card: T) {
         self.cards.push(card);
