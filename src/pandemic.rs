@@ -238,12 +238,12 @@ pub fn map() -> TravelMatrix {
 
 fn full() -> FlatStack<InfectionCard> {
     let cards: Vec<InfectionCard> = (0..CITY_DISEASES.len()).collect();
-    return FlatStack { cards: cards };
+    return FlatStack::new(cards);
 }
 
 fn player_cards() -> FlatStack<PlayerCard> {
     let cards: Vec<PlayerCard> = (0..CITY_DISEASES.len()).map(|i| PlayerCard::City(i)).collect();
-    return FlatStack { cards: cards }; 
+    return FlatStack::new(cards);
 }
 
 #[derive(Clone)]
@@ -324,7 +324,7 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
 }
 
 pub fn setup(state: &mut State, epidemic_cards: usize) {
-    let mut epidemic_stack = FlatStack { cards: vec![PlayerCard::Epidemic; epidemic_cards]};
+    let mut epidemic_stack = FlatStack::new(vec![PlayerCard::Epidemic; epidemic_cards]);
     // Insert epidemic cards
     let mut stacks = state.player_cards.split(epidemic_stack.len());
     for stack in &mut stacks {
@@ -512,7 +512,7 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
     }
 
     // build station
-    for card in &player.hand.cards {
+    for card in player.hand.cards() {
         if let PlayerCard::City(city) = card {
             if player.location == *city {
                 plys.push(Ply::Construct(*city));
@@ -526,7 +526,7 @@ pub fn valid_plys(state: &State) -> Vec<Ply> {
             if !state.cured[disease] {
                 // Iterate through all possible ways to select five cards
                 // from of the same color from the hand
-                let combinations = player.hand.cards
+                let combinations = player.hand.cards()
                     .iter()
                     .filter(|&card| matches_disease(card, disease))
                     .combinations(5);

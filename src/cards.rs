@@ -1,8 +1,12 @@
 #[derive(Clone)]
 pub struct FlatStack<T> {
-    pub cards: Vec<T>,
+    cards: Vec<T>,
 }
-
+impl<T> FlatStack<T> {
+    pub fn new(cards: Vec<T>) -> FlatStack<T> {
+        FlatStack { cards: cards }
+    }
+}
 // Stack - push is_empty, etc
 // Deck - draw, split
 // Hand - iterate, discard to deck
