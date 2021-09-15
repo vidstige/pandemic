@@ -1,10 +1,8 @@
 use std::collections::HashSet;
 use itertools::Itertools;
 
-use super::cards::Stack;
-use super::cards::Drawable;
-use super::cards::deal;
-use super::cards::discard;
+use super::cards::{Stack, FlatStack};
+use super::cards::{deal, empty_stack};
 use super::cards;
 
 const DISEASES: usize = 4;
@@ -238,23 +236,19 @@ pub fn map() -> TravelMatrix {
     return tm; 
 }
 
-fn empty<T>() -> Stack<T> {
-    return Stack { cards: vec![] };
-}
-
-fn full() -> Stack<InfectionCard> {
+fn full() -> FlatStack<InfectionCard> {
     let cards: Vec<InfectionCard> = (0..CITY_DISEASES.len()).collect();
-    return Stack { cards: cards };
+    return FlatStack { cards: cards };
 }
 
-fn player_cards() -> Stack<PlayerCard> {
+fn player_cards() -> FlatStack<PlayerCard> {
     let cards: Vec<PlayerCard> = (0..CITY_DISEASES.len()).map(|i| PlayerCard::City(i)).collect();
-    return Stack { cards: cards }; 
+    return FlatStack { cards: cards }; 
 }
 
 #[derive(Clone)]
 pub struct Player {
-    hand: Stack<PlayerCard>,
+    hand: FlatStack<PlayerCard>,
     location: usize, // city index
 }
 
@@ -263,10 +257,10 @@ pub struct State {
     turn: usize,
     actions_taken: usize,
     players: Vec<Player>,
-    player_cards: Stack<PlayerCard>,
-    player_discard: Stack<PlayerCard>,
-    infection_cards: Stack<InfectionCard>,
-    infection_discard: Stack<InfectionCard>,
+    player_cards: FlatStack<PlayerCard>,
+    player_discard: FlatStack<PlayerCard>,
+    infection_cards: FlatStack<InfectionCard>,
+    infection_discard: FlatStack<InfectionCard>,
     infection_rate: usize,
     stations: HashSet<usize>,
     cured: [bool; DISEASES],
@@ -284,11 +278,11 @@ pub fn create(players: usize) -> State  {
     return State {
         turn: 0,
         actions_taken: 0,
-        players: vec![Player { hand: empty(), location: atlanta }; players],
+        players: vec![Player { hand: empty_stack(), location: atlanta }; players],
         player_cards: player_cards(),
-        player_discard: empty(),
+        player_discard: empty_stack(),
         infection_cards: full(),
-        infection_discard: empty(),
+        infection_discard: empty_stack(),
         infection_rate: 0,
         stations: HashSet::new(),
         cured: [false; DISEASES],
@@ -330,9 +324,9 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
 }
 
 pub fn setup(state: &mut State, epidemic_cards: usize) {
-    let mut epidemic_stack = Stack { cards: vec![PlayerCard::Epidemic; epidemic_cards]};
+    let mut epidemic_stack = FlatStack { cards: vec![PlayerCard::Epidemic; epidemic_cards]};
     // Insert epidemic cards
-    let mut stacks = cards::split(&mut state.player_cards, epidemic_stack.cards.len());
+    let mut stacks = state.player_cards.split(epidemic_stack.cards.len());
     for stack in &mut stacks {
         deal(&mut epidemic_stack, stack);
     }
@@ -428,14 +422,14 @@ pub fn perform(state: &mut State, ply: &Ply) {
         }
         Ply::Construct(city) => {
             let hand = &mut state.players[player_index].hand;
-            discard(hand, &PlayerCard::City(*city), &mut state.player_discard);
+            hand.discard(&PlayerCard::City(*city), &mut state.player_discard);
             state.stations.insert(*city);
         }
         Ply::Cure(disease, cards) => {
             // Discard five cards
             let hand = &mut state.players[player_index].hand;
             for card in cards {
-                discard(hand, card, &mut state.player_discard);
+                hand.discard(card, &mut state.player_discard);
             }
             state.cured[*disease] = true;
         }
