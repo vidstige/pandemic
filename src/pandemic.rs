@@ -236,7 +236,7 @@ pub fn map() -> TravelMatrix {
     return tm; 
 }
 
-fn full() -> FlatStack<InfectionCard> {
+fn infection_cards() -> FlatStack<InfectionCard> {
     let cards: Vec<InfectionCard> = (0..CITY_DISEASES.len()).collect();
     return FlatStack::new(cards);
 }
@@ -281,7 +281,7 @@ pub fn create(players: usize) -> State  {
         players: vec![Player { hand: empty_stack(), location: atlanta }; players],
         player_cards: player_cards(),
         player_discard: empty_stack(),
-        infection_cards: full(),
+        infection_cards: infection_cards(),
         infection_discard: empty_stack(),
         infection_rate: 0,
         stations: HashSet::new(),
