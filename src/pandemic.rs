@@ -324,15 +324,6 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
 }
 
 pub fn setup(state: &mut State, epidemic_cards: usize) {
-    let mut epidemic_stack = FlatStack::new(vec![PlayerCard::Epidemic; epidemic_cards]);
-    // Insert epidemic cards
-    let mut stacks = FlatStack::split(&mut state.player_cards, epidemic_stack.len());
-    for stack in &mut stacks {
-        deal(&mut epidemic_stack, stack);
-    }
-    state.player_cards = cards::combine(&mut stacks);
-
-    
     // Deal player cards
     let n = 6 - state.players.len();
     for player in &mut state.players {
@@ -340,6 +331,14 @@ pub fn setup(state: &mut State, epidemic_cards: usize) {
             deal(&mut state.player_cards, &mut player.hand);
         }
     }
+
+    let mut epidemic_stack = FlatStack::new(vec![PlayerCard::Epidemic; epidemic_cards]);
+    // Insert epidemic cards
+    let mut stacks = FlatStack::split(&mut state.player_cards, epidemic_stack.len());
+    for stack in &mut stacks {
+        deal(&mut epidemic_stack, stack);
+    }
+    state.player_cards = cards::combine(&mut stacks);
 
     // Infect three cities with three cubes, three cities with two cubes and three cities
     // with one cube

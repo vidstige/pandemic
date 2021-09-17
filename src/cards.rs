@@ -1,3 +1,5 @@
+use std::cmp;
+
 // Stack - push is_empty, etc
 // Deck - draw
 // Hand - iterate, discard to deck
@@ -33,7 +35,8 @@ impl<T> FlatStack<T> {
         let mut stacks = vec!();
         let chunk_size = stack.cards.len() / n;
         while !stack.cards.is_empty() {
-            stacks.push(FlatStack { cards: stack.cards.drain(0..chunk_size).collect() });
+            let left = cmp::min(chunk_size, stack.cards.len());
+            stacks.push(FlatStack { cards: stack.cards.drain(0..left).collect() });
         }
         return stacks;
     }
