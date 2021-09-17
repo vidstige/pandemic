@@ -1,5 +1,5 @@
 // Stack - push is_empty, etc
-// Deck - draw, split
+// Deck - draw
 // Hand - iterate, discard to deck
 
 pub trait Stack<T>: Sized {
@@ -11,7 +11,6 @@ pub trait Stack<T>: Sized {
 pub trait Deck<T>: Stack<T> {
     fn draw(&mut self) -> Option<T>;
     fn draw_bottom(&mut self) -> Option<T>;
-    fn split(&mut self, n: usize) -> Vec<Self>;
 }
 
 pub trait Hand<T>: Stack<T> {
@@ -29,6 +28,14 @@ pub struct FlatStack<T> {
 impl<T> FlatStack<T> {
     pub fn new(cards: Vec<T>) -> FlatStack<T> {
         FlatStack { cards: cards }
+    }
+    pub fn split(stack: &mut FlatStack<T>, n: usize) -> Vec<FlatStack<T>> {
+        let mut stacks = vec!();
+        let chunk_size = stack.cards.len() / n;
+        while !stack.cards.is_empty() {
+            stacks.push(FlatStack { cards: stack.cards.drain(0..chunk_size).collect() });
+        }
+        return stacks;
     }
 }
 
@@ -52,14 +59,6 @@ impl<T: PartialEq> Deck<T> for FlatStack<T> {
     fn draw_bottom(&mut self) -> Option<T> {
         return self.cards.drain(0..1).next();
     }
-    fn split(&mut self, n: usize) -> Vec<Self> {
-        let mut stacks = vec!();
-        let chunk_size = self.cards.len() / n;
-        while !self.cards.is_empty() {
-            stacks.push(Self { cards: self.cards.drain(0..chunk_size).collect() });
-        }
-        return stacks;
-    }
 }
 
 impl<T: PartialEq> Hand<T> for FlatStack<T> {
@@ -77,6 +76,51 @@ impl<T: PartialEq> Hand<T> for FlatStack<T> {
 
 pub fn empty_stack<T>() -> FlatStack<T> {
     return FlatStack{ cards: vec!() };
+}
+
+// ComboStack
+// Consist of several stacks stacked together. Allows for correct random draws of stacked
+// stacks
+pub struct ComboStack<T> {
+  stacks: Vec<FlatStack<T>>,
+}
+impl<T> ComboStack<T> {
+  pub fn new(stacks: Vec<FlatStack<T>>) -> ComboStack<T> {
+      ComboStack { stacks: stacks }
+  }
+}
+
+impl<T: PartialEq> Stack<T> for ComboStack<T> {
+  fn is_empty(&self) -> bool {
+      match self.stacks.last() {
+          Some(stack) => stack.is_empty(),
+          None => true
+      }
+  }
+  fn len(&self) -> usize {
+      self.stacks.iter().map(|stack| stack.len()).sum()
+  }
+  fn push(&mut self, card: T) {
+      match self.stacks.last_mut() {
+          Some(stack) => stack.push(card),
+          None => self.stacks.push(FlatStack::new(vec![card])),
+      }
+  }
+}
+
+impl<T: PartialEq> Deck<T> for ComboStack<T> {
+  fn draw(&mut self) -> Option<T> {
+      match self.stacks.last_mut() {
+          Some(stack) => stack.draw(),
+          None => None
+      }
+  }
+  fn draw_bottom(&mut self) -> Option<T> {
+      if self.stacks.is_empty() {
+          return None
+      }
+      self.stacks[0].draw_bottom()
+  }
 }
 
 // Generic functions
