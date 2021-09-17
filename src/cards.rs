@@ -1,12 +1,3 @@
-#[derive(Clone)]
-pub struct FlatStack<T> {
-    cards: Vec<T>,
-}
-impl<T> FlatStack<T> {
-    pub fn new(cards: Vec<T>) -> FlatStack<T> {
-        FlatStack { cards: cards }
-    }
-}
 // Stack - push is_empty, etc
 // Deck - draw, split
 // Hand - iterate, discard to deck
@@ -27,6 +18,18 @@ pub trait Hand<T>: Stack<T> {
     fn cards(&self) -> &Vec<T>;
     fn discard_at(&mut self, index: usize, discard: &mut Self);
     fn discard(&mut self, card: &T, discard: &mut Self);
+}
+
+// Flatstack
+
+#[derive(Clone)]
+pub struct FlatStack<T> {
+    cards: Vec<T>,
+}
+impl<T> FlatStack<T> {
+    pub fn new(cards: Vec<T>) -> FlatStack<T> {
+        FlatStack { cards: cards }
+    }
 }
 
 impl<T: PartialEq> Stack<T> for FlatStack<T> {
@@ -76,6 +79,7 @@ pub fn empty_stack<T>() -> FlatStack<T> {
     return FlatStack{ cards: vec!() };
 }
 
+// Generic functions
 pub fn deal<T, S: Deck<T>>(deck: &mut S, hand: &mut S) {
     match deck.draw() {
         Some(card) => hand.push(card),

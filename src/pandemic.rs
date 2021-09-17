@@ -326,7 +326,7 @@ fn infect(state: &mut State, infection_card: InfectionCard, n: usize) {
 pub fn setup(state: &mut State, epidemic_cards: usize) {
     let mut epidemic_stack = FlatStack::new(vec![PlayerCard::Epidemic; epidemic_cards]);
     // Insert epidemic cards
-    let mut stacks = state.player_cards.split(epidemic_stack.len());
+    let mut stacks = FlatStack::split(&mut state.player_cards, epidemic_stack.len());
     for stack in &mut stacks {
         deal(&mut epidemic_stack, stack);
     }
