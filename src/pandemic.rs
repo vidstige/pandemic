@@ -406,7 +406,7 @@ fn epidemic(state: &mut State) {
     state.infection_discard.push(card);
 
     // 4. Add infection discard pile to infection deck
-    cards::stack(&mut state.infection_cards, &mut state.infection_discard);
+    state.infection_cards.stack(&mut state.infection_discard);
 }
 
 pub fn perform(state: &mut State, ply: &Ply) {

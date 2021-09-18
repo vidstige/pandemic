@@ -103,6 +103,11 @@ impl<T> ComboStack<T> {
   pub fn from_flat(stack: FlatStack<T>) -> ComboStack<T> {
       ComboStack { stacks: vec![stack] }
   }
+  pub fn stack(&mut self, stack: &mut FlatStack<T>) {
+    let mut tmp = FlatStack { cards: vec!() };
+    tmp.cards.append(&mut stack.cards);
+    self.stacks.push(tmp);
+  }
 }
 
 impl<T: PartialEq> Stack<T> for ComboStack<T> {
@@ -150,13 +155,6 @@ pub fn deal<T, S1: Deck<T>, S2: Deck<T>>(deck: &mut S1, hand: &mut S2) {
     match deck.draw() {
         Some(card) => hand.push(card),
         None => (),
-    }
-}
-
-// Stacks the source on top of target. Source will be empty after
-pub fn stack<T, S1: Deck<T>, S2: Deck<T>>(target: &mut S1, source: &mut S2) {
-    while !source.is_empty() {
-        target.push(source.draw().unwrap());
     }
 }
 
