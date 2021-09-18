@@ -236,9 +236,9 @@ pub fn map() -> TravelMatrix {
     return tm; 
 }
 
-fn infection_cards() -> FlatStack<InfectionCard> {
+fn infection_cards() -> ComboStack<InfectionCard> {
     let cards: Vec<InfectionCard> = (0..CITY_DISEASES.len()).collect();
-    return FlatStack::new(cards);
+    return ComboStack::new(cards);
 }
 
 fn player_cards() -> FlatStack<PlayerCard> {
@@ -259,7 +259,7 @@ pub struct State {
     players: Vec<Player>,
     player_cards: ComboStack<PlayerCard>,
     player_discard: FlatStack<PlayerCard>,
-    infection_cards: FlatStack<InfectionCard>,
+    infection_cards: ComboStack<InfectionCard>,
     infection_discard: FlatStack<InfectionCard>,
     infection_rate: usize,
     stations: HashSet<usize>,

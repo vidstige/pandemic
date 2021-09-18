@@ -90,8 +90,8 @@ pub struct ComboStack<T> {
   stacks: Vec<FlatStack<T>>,
 }
 impl<T> ComboStack<T> {
-  pub fn new(stacks: Vec<FlatStack<T>>) -> ComboStack<T> {
-      ComboStack { stacks: stacks }
+  pub fn new(cards: Vec<T>) -> ComboStack<T> {
+      ComboStack { stacks: vec![FlatStack::new(cards)] }
   }
   pub fn flatten(&mut self) -> FlatStack<T> {
       let mut cards = vec!();
@@ -154,7 +154,7 @@ pub fn deal<T, S1: Deck<T>, S2: Deck<T>>(deck: &mut S1, hand: &mut S2) {
 }
 
 // Stacks the source on top of target. Source will be empty after
-pub fn stack<T, S: Deck<T>>(target: &mut S, source: &mut S) {
+pub fn stack<T, S1: Deck<T>, S2: Deck<T>>(target: &mut S1, source: &mut S2) {
     while !source.is_empty() {
         target.push(source.draw().unwrap());
     }
