@@ -84,12 +84,24 @@ pub fn empty_stack<T>() -> FlatStack<T> {
 // ComboStack
 // Consist of several stacks stacked together. Allows for correct random draws of stacked
 // stacks
+
+#[derive(Clone)]
 pub struct ComboStack<T> {
   stacks: Vec<FlatStack<T>>,
 }
 impl<T> ComboStack<T> {
   pub fn new(stacks: Vec<FlatStack<T>>) -> ComboStack<T> {
       ComboStack { stacks: stacks }
+  }
+  pub fn flatten(&mut self) -> FlatStack<T> {
+      let mut cards = vec!();
+      for stack in &mut self.stacks {
+          cards.append(&mut stack.cards);
+      }
+      FlatStack{ cards: cards }
+  }
+  pub fn from_flat(stack: FlatStack<T>) -> ComboStack<T> {
+      ComboStack { stacks: vec![stack] }
   }
 }
 
@@ -114,9 +126,16 @@ impl<T: PartialEq> Stack<T> for ComboStack<T> {
 impl<T: PartialEq> Deck<T> for ComboStack<T> {
   fn draw(&mut self) -> Option<T> {
       match self.stacks.last_mut() {
-          Some(stack) => stack.draw(),
+          Some(stack) => {
+              let card = stack.draw();
+              if stack.is_empty() {
+                  self.stacks.pop();
+              }
+              card
+          },
           None => None
       }
+      
   }
   fn draw_bottom(&mut self) -> Option<T> {
       if self.stacks.is_empty() {
@@ -127,7 +146,7 @@ impl<T: PartialEq> Deck<T> for ComboStack<T> {
 }
 
 // Generic functions
-pub fn deal<T, S: Deck<T>>(deck: &mut S, hand: &mut S) {
+pub fn deal<T, S1: Deck<T>, S2: Deck<T>>(deck: &mut S1, hand: &mut S2) {
     match deck.draw() {
         Some(card) => hand.push(card),
         None => (),
@@ -141,10 +160,6 @@ pub fn stack<T, S: Deck<T>>(target: &mut S, source: &mut S) {
     }
 }
 
-pub fn combine<T>(stacks: &mut Vec<FlatStack<T>>) -> FlatStack<T> {
-    let mut combined = FlatStack { cards: vec!() };
-    for stack in stacks {
-        combined.cards.append(&mut stack.cards);
-    }
-    return combined;
+pub fn combine<T>(stacks: Vec<FlatStack<T>>) -> ComboStack<T> {
+    ComboStack { stacks: stacks}
 }

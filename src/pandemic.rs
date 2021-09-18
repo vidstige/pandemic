@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use itertools::Itertools;
 
-use super::cards::{Deck, Hand, Stack, FlatStack};
+use super::cards::{Deck, Hand, Stack, ComboStack, FlatStack};
 use super::cards::{deal, empty_stack};
 use super::cards;
 
@@ -257,7 +257,7 @@ pub struct State {
     turn: usize,
     actions_taken: usize,
     players: Vec<Player>,
-    player_cards: FlatStack<PlayerCard>,
+    player_cards: ComboStack<PlayerCard>,
     player_discard: FlatStack<PlayerCard>,
     infection_cards: FlatStack<InfectionCard>,
     infection_discard: FlatStack<InfectionCard>,
@@ -279,7 +279,7 @@ pub fn create(players: usize) -> State  {
         turn: 0,
         actions_taken: 0,
         players: vec![Player { hand: empty_stack(), location: atlanta }; players],
-        player_cards: player_cards(),
+        player_cards: ComboStack::from_flat(player_cards()),
         player_discard: empty_stack(),
         infection_cards: infection_cards(),
         infection_discard: empty_stack(),
@@ -334,11 +334,11 @@ pub fn setup(state: &mut State, epidemic_cards: usize) {
 
     let mut epidemic_stack = FlatStack::new(vec![PlayerCard::Epidemic; epidemic_cards]);
     // Insert epidemic cards
-    let mut stacks = FlatStack::split(&mut state.player_cards, epidemic_stack.len());
+    let mut stacks = FlatStack::split(&mut state.player_cards.flatten(), epidemic_stack.len());
     for stack in &mut stacks {
         deal(&mut epidemic_stack, stack);
     }
-    state.player_cards = cards::combine(&mut stacks);
+    state.player_cards = cards::combine(stacks);
 
     // Infect three cities with three cubes, three cities with two cubes and three cities
     // with one cube
